@@ -9,22 +9,49 @@
 
 ## 安裝與建置
 
-在使用腳本之前，您需要先建立 Docker 映像檔。映像檔名稱預設為 `pandoc-alpine:latest`。
+**硬碟容量須知**：由於映像檔包含了 Texlive 的軟體包，因此容量佔用較大，約佔用 1.2 GB。在拉取或建置前請檢查硬碟剩餘容量是否足夠。
 
-在專案根目錄下執行以下指令來建置映像檔：
+在使用腳本之前，您需要先取得 `pandoc-docker:main` Docker 映像檔。
+
+在任意目錄執行以下指令來拉取映像檔：
 
 ```bash
-docker build -t pandoc-alpine:latest .
+docker pull ghcr.io/minstrike520/pandoc-docker:main
+```
+
+或者，在專案根目錄下執行以下指令來自行建置映像檔：
+
+```bash
+docker build -t pandoc-docker:main .
 ```
 
 ## 使用方法
 
 使用提供的 `pandoc-docker.sh` 腳本來進行文件轉換，腳本會自動掛載當前目錄並執行轉換。
 
+關於 Pandoc 支援的 Markdown 語法，請參見[Pandoc 官方文件](https://pandoc.org/MANUAL.html)。
+
+值得注意的是，Pandoc 支援在 Markdown 新增 [YAML Frontmatter](https://jekyllrb.com/docs/front-matter/) 以對輸出進行細項調整。比如，以下設置會在封面加入標題「期末報告」，並註明著作日期「2024/3/20」與作者「小明」：
+
+
+```yaml
+title: "期末報告"
+author: "小明"
+date: "2024-03-20"
+```
+
+欲知完整的語法說明，請參照 [#Metadata variables](https://pandoc.org/MANUAL.html#metadata-variables)。
+
 ### 基本語法
 
 ```bash
 ./pandoc-docker.sh <markdown_檔案> <header_檔案> [-o 輸出_pdf]
+```
+
+如果想要使用非預設的映像檔名稱，請指定環境變數 `$PANDOC_DOCKER_IMAGE`：
+
+```bash
+PANDOC_DOCKER_IMAGE="my-pandoc:latest" ./pandoc-docker.sh (...)
 ```
 
 ### 範例
