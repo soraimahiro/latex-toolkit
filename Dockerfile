@@ -14,6 +14,7 @@ RUN apk add --no-cache \
 
 WORKDIR /data
 
+COPY header.tex /default_header.tex
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
