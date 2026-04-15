@@ -45,7 +45,7 @@ date: "2024-03-20"
 ### 基本語法
 
 ```bash
-./pandoc-docker.sh <markdown_檔案> <header_檔案> [-o 輸出_pdf]
+./pandoc-docker.sh <markdown_檔案> [額外 pandoc 選項...]
 ```
 
 如果想要使用非預設的映像檔名稱，請指定環境變數 `$PANDOC_DOCKER_IMAGE`：
@@ -54,33 +54,45 @@ date: "2024-03-20"
 PANDOC_DOCKER_IMAGE="my-pandoc:latest" ./pandoc-docker.sh (...)
 ```
 
+也可以傳入 `--no-default-header` 來停用預設的 `header.tex`：
+
+```bash
+./pandoc-docker.sh document.md --no-default-header -H custom_header.tex
+```
+
 ### 範例
 
-1. **基本轉換** (自動將輸出檔名設為與輸入檔相同的 `.pdf`)：
+1. **基本轉換** (自動使用預設標頭檔，並將輸出檔名設為 `.pdf`)：
    ```bash
-   ./pandoc-docker.sh document.md header.tex
+   ./pandoc-docker.sh document.md
    ```
    *這將會產出 `document.pdf`*
 
 2. **自訂輸出檔名**：
    ```bash
-   ./pandoc-docker.sh document.md header.tex -o final_report.pdf
+   ./pandoc-docker.sh document.md -o final_report.pdf
+   ```
+
+3. **加入額外標頭檔**：
+   ```bash
+   ./pandoc-docker.sh document.md -H extra_header1.tex -H extra_header2.tex
    ```
 
 ## 專案結構
 
-- `Dockerfile`: 定義了包含 Pandoc、TeX Live 和 CJK 字體的 Alpine 映像檔。
-- `pandoc-docker.sh`: 執行轉換的 Shell 腳本，封裝了 Docker 的執行指令，方便快速生成 PDF。
-- `header.tex`: LaTeX 標頭檔範例（可用來自訂字體、邊界、段落格式等）。
+- `Dockerfile`: 定義了包含 Pandoc、TeX Live 和 CJK 字體的 Alpine 映像檔，並預先載入預設的標頭檔與執行腳本。
+- `entrypoint.sh`: 容器內部的啟動腳本，負責解析參數、自動補上輸出檔名與預設標頭檔。
+- `pandoc-docker.sh`: 外部用的 Shell 腳本，封裝了 Docker 掛載與執行指令，其餘引數直接透傳給容器。
+- `header.tex`: LaTeX 標頭檔預設範本（包含中文字體設定等），已內建於映像檔中。
 
 ## 腳本運作原理
 
-`pandoc-docker.sh` 會讀取您的輸入文件，並透過以下設定來啟動 Docker 容器：
-- 將當前目錄 (`$(pwd)`) 掛載至容器的 `/data` 目錄。
-- 使用您當前使用者的 UID 及 GID 執行，確保生成的 PDF 具有正確的檔案權限。
-- 指定 PDF 引擎為 `xelatex` 以完整支援 Unicode 和 CJK 字體。
-- 設定頁面邊距 `-V geometry="margin=1.5cm"`。
-- 引入指定的 LaTeX 標頭檔 `-H "$HEADER_TEX"`。
+`pandoc-docker.sh` 會將當前目錄 (`$(pwd)`) 掛載至容器的 `/data` 目錄，並使用當前使用者的 UID 及 GID 啟動容器。
+後續編譯邏輯由容器內的 `entrypoint.sh` 接手處理：
+- 若未指定輸出檔，則自動將輸出檔名設為與輸入檔相同的 `.pdf`。
+- 預設載入映像檔內的 `/default_header.tex`（即 `header.tex`）以提供中文支援，除非傳入了 `--no-default-header`。
+- 自動設定 PDF 引擎為 `xelatex` 以及頁面邊距 `-V geometry="margin=1.5cm"`。
+- 將您傳入的其餘參數（例如多個 `-H`）直接傳遞給 Pandoc。
 
 ## 注意事項
 
