@@ -109,6 +109,57 @@ docker build -t latex-toolkit:main .
 - `latex-toolkit.sh`: 外部用的統一 Shell 腳本，掛載當前目錄並將所有引數透傳給容器。
 - `header.tex`: Pandoc 預設的 LaTeX 標頭檔範本，主要用於 Pandoc Markdown 中文支援。
 
+## VS Code 整合 (LaTeX Workshop)
+
+如果您使用 VS Code 搭配 [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop) 擴充功能，可以透過以下設定將其與本工具整合。
+
+請在 VS Code 的 `settings.json` 中配置自訂的 Tool 與 Recipe（**請將 `command` 的值替換為您系統中 `latex-toolkit.sh` 的絕對路徑**，例如 `/home/username/latex-toolkit/latex-toolkit.sh`）：
+
+```json
+{
+  "latex-workshop.latex.tools": [
+    {
+      "name": "docker-xelatex",
+      "command": "/path/to/latex-toolkit.sh",
+      "args": [
+        "xelatex",
+        "%DOCFILE_EXT%",
+        "-o",
+        "%DOCFILE%.pdf"
+      ],
+      "env": {}
+    },
+    {
+      "name": "docker-lualatex",
+      "command": "/path/to/latex-toolkit.sh",
+      "args": [
+        "lualatex",
+        "%DOCFILE_EXT%",
+        "-o",
+        "%DOCFILE%.pdf"
+      ],
+      "env": {}
+    }
+  ],
+  "latex-workshop.latex.recipes": [
+    {
+      "name": "Docker: XeLaTeX",
+      "tools": [
+        "docker-xelatex"
+      ]
+    },
+    {
+      "name": "Docker: LuaLaTeX",
+      "tools": [
+        "docker-lualatex"
+      ]
+    }
+  ]
+}
+```
+
+設定完成後，在 VS Code 編輯 `.tex` 檔案時，即可在左側 TeX 面板選擇 `Docker: XeLaTeX` 或 `Docker: LuaLaTeX` 進行中文編譯。
+
 ## 注意事項
 
 - 請確保 `latex-toolkit.sh` 具有執行權限 (`chmod +x latex-toolkit.sh`)。
