@@ -160,6 +160,31 @@ docker build -t latex-toolkit:main .
 
 設定完成後，在 VS Code 編輯 `.tex` 檔案時，即可在左側 TeX 面板選擇 `Docker: XeLaTeX` 或 `Docker: LuaLaTeX` 進行中文編譯。
 
+### 如何為特定檔案指定編譯引擎
+
+如果您的預設編譯方式是 XeLaTeX，但您希望某個特定檔案（例如 `a.tex`）使用 LuaLaTeX 編譯，您可以使用以下三種方式之一：
+
+#### 1. 使用 Magic Comment 魔法註解（最推薦，針對單一檔案）
+在該 `.tex` 檔案的**最頂部第一行**，加上 LaTeX Workshop 專用的 Recipe 魔法註解。例如指定使用 LuaLaTeX：
+
+```latex
+%!LW recipe=Docker: LuaLaTeX
+```
+*當您儲存或執行編譯時，LaTeX Workshop 會自動讀取此註解並使用 `Docker: LuaLaTeX` 這套 Recipe 來編譯該檔案。*
+
+#### 2. 修改專案（工作區）預設值
+如果您希望整個專案（Workspace）的所有檔案都預設改用 LuaLaTeX，可以在專案根目錄的 `.vscode/settings.json` 中設定：
+
+```json
+{
+  "latex-workshop.latex.recipe.default": "Docker: LuaLaTeX"
+}
+```
+
+#### 3. 手動選擇編譯 Recipe
+- **側邊欄選單**：點擊 VS Code 左側的 **TeX 標籤**。在 **Build LaTeX project** 列表中，手動點擊 **Docker: LuaLaTeX**。
+- **命令列**：按下 `Ctrl + Shift + P` (Mac 上為 `Cmd + Shift + P`)，輸入 `LaTeX Workshop: Build with recipe`，然後選擇 `Docker: LuaLaTeX`。
+
 ## 注意事項
 
 - 請確保 `latex-toolkit.sh` 具有執行權限 (`chmod +x latex-toolkit.sh`)。
