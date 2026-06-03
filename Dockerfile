@@ -1,16 +1,12 @@
-FROM alpine:latest
+FROM texlive/texlive:latest
 
-RUN apk add --no-cache \
+# 安裝 pandoc, fonts-noto-cjk 及 fontconfig 以支援 Markdown 轉換與中文字型
+RUN apt update && apt install -y \
     pandoc \
-    texlive-xetex \
-    texlive-luatex \
-    texlive-latexextra \
-    texlive-langextra \
-    font-noto-cjk \
-    fontconfig && \
-    mkdir -p /var/cache/fontconfig && \
-    chmod 777 /var/cache/fontconfig && \
-    fc-cache -fv
+    fonts-noto-cjk \
+    fontconfig \
+    && rm -rf /var/lib/apt/lists/* \
+    && fc-cache -fv
 
 WORKDIR /data
 

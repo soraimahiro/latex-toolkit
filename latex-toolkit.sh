@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # 常數
-LOCAL_IMAGE="pandoc-docker:main"
+LOCAL_IMAGE="latex-toolkit:main"
+OLD_LOCAL_IMAGE="pandoc-docker:main"
 GHCR_IMAGE="ghcr.io/minstrike520/pandoc-docker:main"
 
 # 檢查 Docker 執行權限
@@ -11,7 +12,13 @@ if ! docker info >/dev/null 2>&1; then
 fi
 
 # 決定要使用的 Docker 映像檔
-if [ -n "$PANDOC_DOCKER_IMAGE" ]; then
+if [ -n "$LATEX_TOOLKIT_IMAGE" ]; then
+    if ! docker image inspect "$LATEX_TOOLKIT_IMAGE" >/dev/null 2>&1; then
+      echo "錯誤：找不到映像檔 '$LATEX_TOOLKIT_IMAGE'"
+      exit 1
+    fi
+    DOCKER_IMAGE="$LATEX_TOOLKIT_IMAGE"
+elif [ -n "$PANDOC_DOCKER_IMAGE" ]; then
     if ! docker image inspect "$PANDOC_DOCKER_IMAGE" >/dev/null 2>&1; then
       echo "錯誤：找不到映像檔 '$PANDOC_DOCKER_IMAGE'"
       exit 1
@@ -21,11 +28,14 @@ else
     if docker image inspect "$LOCAL_IMAGE" >/dev/null 2>&1; then
         DOCKER_IMAGE="$LOCAL_IMAGE"
         echo "使用映像檔 '$LOCAL_IMAGE'"
+    elif docker image inspect "$OLD_LOCAL_IMAGE" >/dev/null 2>&1; then
+        DOCKER_IMAGE="$OLD_LOCAL_IMAGE"
+        echo "使用映像檔 '$OLD_LOCAL_IMAGE'"
     elif docker image inspect "$GHCR_IMAGE" >/dev/null 2>&1; then
         DOCKER_IMAGE="$GHCR_IMAGE"
         echo "使用映像檔 '$GHCR_IMAGE'"
     else
-        echo "錯誤：找不到映像檔 '$LOCAL_IMAGE' 或 '$GHCR_IMAGE'"
+        echo "錯誤：找不到映像檔 '$LOCAL_IMAGE'、'$OLD_LOCAL_IMAGE' 或 '$GHCR_IMAGE'"
         exit 1
     fi
 fi
