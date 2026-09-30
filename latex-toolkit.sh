@@ -40,9 +40,14 @@ else
     fi
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # 執行 Docker，所有引數交由 container 內的 entrypoint.sh 處理
 docker run --rm \
+  -e XDG_CACHE_HOME=/tmp/.cache \
   -v "$(pwd):/data" \
+  -v "$SCRIPT_DIR/entrypoint.sh:/entrypoint.sh" \
+  -v "$SCRIPT_DIR/template:/template:ro" \
   -u $(id -u):$(id -g) \
   $DOCKER_IMAGE \
   "$@"

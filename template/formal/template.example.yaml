@@ -1,0 +1,30 @@
+# Formal Technical Report Template Configuration
+# 此檔為範例（納入 git）。自訂時複製為 template.yaml 後修改，template.yaml 不納入 git。
+pdf-engine: xelatex
+from: markdown+hard_line_breaks
+template: /template/formal/template.latex
+highlight-style: tango
+filters:
+  - /template/formal/table-grid.lua
+
+# 以下為選用的預設值，預設全部註解（未設定時使用範本內建值，即各行所示的值）。
+# 預設值（優先順序最低：-V > md 的 YAML front matter > 此檔）
+# 注意：這裡的變數必須加 default- 前綴。若直接寫 font: sans，pandoc 會讓它
+# 蓋過 md 的設定。範本未設定時的內建預設值如各行註解所示。
+# variables:
+#   # 字體：serif（明體 Noto Serif）、sans（黑體 Noto Sans）、times（Times + 明體中文）
+#   default-font: serif
+#   # 內文字級：10pt、11pt、12pt
+#   default-fontsize: 11pt
+#   # 紙張：a4、letter...
+#   default-papersize: a4
+#   # 頁面邊界（清單，可改為 margin=2.5cm 等）
+#   default-geometry:
+#     - a4paper
+#     - margin=2.0cm
+#   # LaTeX 文件類別：article、report...
+#   default-documentclass: article
+#   # 目錄深度（需由 md 或 -V 設定 toc: true 才會產生目錄）
+#   default-toc-depth: 3
+#   # 自動編號深度（需由 md 或 -V 設定 numbersections: true 才會編號）
+#   default-secnumdepth: 5

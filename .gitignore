@@ -1,0 +1,3 @@
+.DS_Store
+# 本機自訂的範本設定（範例見 template.example.yaml）
+template/*/template.yaml

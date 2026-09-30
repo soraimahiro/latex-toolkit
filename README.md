@@ -96,18 +96,39 @@ docker build -t latex-toolkit:main .
 # 自訂輸出檔名
 ./latex-toolkit.sh pandoc document.md -o final_report.pdf
 
+# 使用內建正式技術報告範本（直接指定範本名稱即可）
+./latex-toolkit.sh pandoc document.md --template formal -o final_report.pdf
+
+# 透過參數指定字體：serif / sans / times
+./latex-toolkit.sh pandoc document.md --template formal -V font=times -o report_times.pdf
+
+# 列出所有可用的範本名稱
+./latex-toolkit.sh pandoc --list-templates
+
 # 停用預設標頭，使用自訂標頭
 ./latex-toolkit.sh pandoc document.md --no-default-header -H custom_header.tex
 ```
+
+#### 使用範本
+
+範本存放於 `template/` 下，每個範本一個子目錄。使用時以 `--template <名稱>`（或 `-t <名稱>`）指定名稱即可，不需輸入路徑。`formal` 範本的設定變數與字體選項請參閱 [template/formal/README.md](template/formal/README.md)。
+
+#### 新增範本
+
+例如建立 `academic`：
+1. 在 `template/` 下建立子資料夾 `template/academic/`。
+2. 放入 `template.latex`（LaTeX 排版範本）與 `template.yaml`（Pandoc Defaults 設定檔，需設定 `template: /template/academic/template.latex`），另可放入 Lua Filter 等檔案。
+3. 之後即可用 `--template academic` 使用。
 
 ---
 
 ## 專案結構
 
 - `Dockerfile`: 基於 `texlive/texlive:latest`，內建 Pandoc、Noto CJK 字體以及 fontconfig。
-- `entrypoint.sh`: 容器內的啟動腳本，負責分流 `xelatex`、`lualatex` 與 `pandoc`，並進行對應的參數解析與編譯。
-- `latex-toolkit.sh`: 外部用的統一 Shell 腳本，掛載當前目錄並將所有引數透傳給容器。
-- `header.tex`: Pandoc 預設的 LaTeX 標頭檔範本，主要用於 Pandoc Markdown 中文支援。
+- `entrypoint.sh`: 容器內的啟動腳本，負責分流 `xelatex`、`lualatex` 與 `pandoc`，並進行範本解析與編譯。
+- `latex-toolkit.sh`: 外部統一 Shell 腳本，掛載當前目錄與範本目錄並將引數傳遞給容器。
+- `header.tex`: Pandoc 預設的 LaTeX 標頭檔，用於一般 Markdown 中文支援。
+- `template/`: Pandoc 範本庫目錄，每個範本以獨立子目錄存放（如 `template/formal/`）。
 
 ## VS Code 整合 (LaTeX Workshop)
 

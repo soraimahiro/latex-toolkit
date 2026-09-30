@@ -1,4 +1,31 @@
-#!/bin/sh
+#!/bin/bash
+
+# 尋找具名範本目錄中的設定檔或 LaTeX 範本
+find_named_template() {
+    local name="$1"
+    # 若為已存在之實體檔案或明確路徑，則不視為具名範本名稱
+    if [ -f "$name" ]; then
+        return 1
+    fi
+
+    # 依序搜尋當前工作目錄與工具箱內建範本目錄
+    for base in "/data/template/$name" "/data/templates/$name" "/template/$name"; do
+        if [ -f "$base/template.yaml" ]; then
+            echo "--defaults=$base/template.yaml"
+            return 0
+        elif [ -f "$base/$name.yaml" ]; then
+            echo "--defaults=$base/$name.yaml"
+            return 0
+        elif [ -f "$base/template.latex" ]; then
+            echo "--template=$base/template.latex"
+            return 0
+        elif [ -f "$base/$name.latex" ]; then
+            echo "--template=$base/$name.latex"
+            return 0
+        fi
+    done
+    return 1
+}
 
 if [ "$1" = "xelatex" ] || [ "$1" = "lualatex" ]; then
     ENGINE="$1"
@@ -82,15 +109,130 @@ if [ "$1" = "xelatex" ] || [ "$1" = "lualatex" ]; then
 elif [ "$1" = "pandoc" ]; then
     shift
 
+    # 檢查是否列出所有可用範本
+    if [ "$1" = "--list-templates" ] || [ "$1" = "-l" ]; then
+        echo "可用的 Pandoc 範本列表："
+        for d in /template/* /data/template/*; do
+            if [ -d "$d" ]; then
+                tname=$(basename "$d")
+                echo "  - $tname"
+            fi
+        done | sort -u
+        exit 0
+    fi
+
     USE_DEFAULT_HEADER=true
+    HAS_CUSTOM_TEMPLATE=false
+    HAS_RESOURCE_PATH=false
     HAS_OUT=false
     INPUT_MD=""
 
-    # 第一次掃描：尋找主要參數
-    for arg in "$@"; do
-        case "$arg" in
+    # 預處理參數：解析具名範本（如 --template formal 或 -d formal）
+    PROCESSED_ARGS=()
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --template=*)
+                VAL="${1#--template=}"
+                if RESOLVED=$(find_named_template "$VAL"); then
+                    PROCESSED_ARGS+=("$RESOLVED")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                else
+                    PROCESSED_ARGS+=("$1")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                fi
+                shift
+                ;;
+            --template|-t)
+                VAL="$2"
+                if [ -n "$VAL" ] && RESOLVED=$(find_named_template "$VAL"); then
+                    PROCESSED_ARGS+=("$RESOLVED")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                    shift 2
+                else
+                    PROCESSED_ARGS+=("$1")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                    shift
+                fi
+                ;;
+            -t*)
+                VAL="${1#-t}"
+                if RESOLVED=$(find_named_template "$VAL"); then
+                    PROCESSED_ARGS+=("$RESOLVED")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                else
+                    PROCESSED_ARGS+=("$1")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                fi
+                shift
+                ;;
+            --defaults=*)
+                VAL="${1#--defaults=}"
+                if RESOLVED=$(find_named_template "$VAL"); then
+                    PROCESSED_ARGS+=("$RESOLVED")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                else
+                    PROCESSED_ARGS+=("$1")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                fi
+                shift
+                ;;
+            --defaults|-d)
+                VAL="$2"
+                if [ -n "$VAL" ] && RESOLVED=$(find_named_template "$VAL"); then
+                    PROCESSED_ARGS+=("$RESOLVED")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                    shift 2
+                else
+                    PROCESSED_ARGS+=("$1")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                    shift
+                fi
+                ;;
+            -d*)
+                VAL="${1#-d}"
+                if RESOLVED=$(find_named_template "$VAL"); then
+                    PROCESSED_ARGS+=("$RESOLVED")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                else
+                    PROCESSED_ARGS+=("$1")
+                    HAS_CUSTOM_TEMPLATE=true
+                    USE_DEFAULT_HEADER=false
+                fi
+                shift
+                ;;
+            -H*|--include-in-header*)
+                USE_DEFAULT_HEADER=false
+                PROCESSED_ARGS+=("$1")
+                shift
+                ;;
             --no-default-header)
                 USE_DEFAULT_HEADER=false
+                shift
+                ;;
+            *)
+                PROCESSED_ARGS+=("$1")
+                shift
+                ;;
+        esac
+    done
+    set -- "${PROCESSED_ARGS[@]}"
+
+    # 第二次掃描：尋找輸入檔案、輸出設定與資源路徑
+    for arg in "$@"; do
+        case "$arg" in
+            --resource-path*)
+                HAS_RESOURCE_PATH=true
                 ;;
             -o)
                 HAS_OUT=true
@@ -99,7 +241,7 @@ elif [ "$1" = "pandoc" ]; then
                 HAS_OUT=true
                 ;;
             -*)
-                # 忽略其他 - 開頭的參數
+                # 忽略其他參數
                 ;;
             *)
                 if [ -z "$INPUT_MD" ]; then
@@ -109,26 +251,28 @@ elif [ "$1" = "pandoc" ]; then
         esac
     done
 
-    # 移除我們的自訂選項，保留原生 pandoc 選項
-    for arg do
-        shift
-        case "$arg" in
-            --no-default-header) continue ;;
-            *) set -- "$@" "$arg" ;;
-        esac
-    done
-
     if [ -z "$INPUT_MD" ]; then
         echo "用法: ./latex-toolkit.sh pandoc <markdown_檔案> [額外 pandoc 選項...]"
-        echo "自訂選項: "
-        echo "  --no-default-header    停用預設的 header.tex"
+        echo "範本選項: "
+        echo "  --template <名稱>    使用指定的範本名稱（例如 formal）"
+        echo "  -d <名稱>            同上，載入指定範本的 Defaults 檔"
+        echo "  --list-templates     列出所有可用範本"
+        echo "  --no-default-header  停用預設的 header.tex"
         exit 1
     fi
 
-    # 如果沒有指定輸出，自動加上
+    # 如果沒有指定輸出，自動加上同名 .pdf
     if [ "$HAS_OUT" = false ]; then
         OUTPUT_PDF="${INPUT_MD%.*}.pdf"
         set -- "$@" -o "$OUTPUT_PDF"
+    fi
+
+    # 自動加入資源搜尋路徑（圖片等）：工作目錄與 Markdown 檔案所在目錄
+    if [ "$HAS_RESOURCE_PATH" = false ] && [ -n "$INPUT_MD" ]; then
+        INPUT_DIR=$(dirname "$INPUT_MD")
+        if [ "$INPUT_DIR" != "." ]; then
+            set -- "$@" --resource-path=".:$INPUT_DIR"
+        fi
     fi
 
     # 如果需要預設 header，自動加上
@@ -145,7 +289,11 @@ elif [ "$1" = "pandoc" ]; then
     echo "參數清單: $@"
     echo "----------------------------------------"
 
-    exec pandoc "$@" --pdf-engine=xelatex -V geometry="margin=1.5cm"
+    if [ "$HAS_CUSTOM_TEMPLATE" = true ]; then
+        exec pandoc "$@"
+    else
+        exec pandoc "$@" --pdf-engine=xelatex -V geometry="margin=1.5cm"
+    fi
 
 else
     echo "錯誤: 未知的指令 '$1'"
