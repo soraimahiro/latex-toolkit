@@ -6,6 +6,7 @@ template: /template/formal/template.latex
 highlight-style: tango
 filters:
   - /template/formal/table-grid.lua
+  - /template/formal/image-align.lua
 
 # 以下為選用的預設值，預設全部註解（未設定時使用範本內建值，即各行所示的值）。
 # 預設值（優先順序最低：-V > md 的 YAML front matter > 此檔）

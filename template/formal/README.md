@@ -7,6 +7,7 @@
 - `template.example.yaml`：Pandoc Defaults 設定範例（納入 git，選用的預設值皆為註解）。
 - `template.yaml`：實際使用的設定檔，由範例複製而來，自行修改（不納入 git，需自行建立：`cp template.example.yaml template.yaml`）。
 - `table-grid.lua`：表格全框線過濾器（自動注入直橫格線）。
+- `image-align.lua`：圖片對齊過濾器（支援 `{align=...}`）。
 - `example.md`：示範文件。
 - `hello.png`：示範圖片。
 
@@ -101,3 +102,19 @@ toc: true
 numbersections: true
 ---
 ```
+
+## 圖片大小與對齊
+
+在圖片後以 `{...}` 設定，多個屬性以空白分隔：
+
+```markdown
+![說明](hello.png){width=50%}
+![說明](hello.png){width=4cm align=left}
+![說明](hello.png){height=3cm align=right}
+```
+
+- `width`、`height`：可用 `%`（相對版面寬度）、`cm`、`mm`、`in`、`pt`；只設一個時維持長寬比。
+- `align`：`left`、`center`（預設）、`right`。僅對有說明文字的圖片（`![說明](...)`）有效。
+- 圖片不浮動，依 md 原文順序排版；放不下時圖片換頁。
+
+表格預設靠左對齊，欄內對齊以 md 表格的 `:---`、`---:`、`:---:` 指定。

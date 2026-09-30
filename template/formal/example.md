@@ -16,7 +16,11 @@ toc: true
 
 > 這是引用區塊。
 
-## 1.1 清單
+分隔線
+
+---
+
+## 清單
 
 - 項目一
 - 項目二
@@ -33,8 +37,6 @@ $$
 \sum_{i=1}^{n} i = \frac{n(n+1)}{2}
 $$
 
----
-
 # 2. 程式碼
 
 ```python
@@ -42,14 +44,12 @@ def greet(name: str) -> str:
     return f"Hello, {name}!"
 
 # 超長的單行會自動折行，不會超出頁面邊界
-message = "The quick brown fox jumps over the lazy dog. " * 5
+message = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nihil voluptatibus, quis sint voluptatem assumenda, pariatur molestias odit, sit atque repellendus natus? Sunt quo neque officiis nam et vero ad necessitatibus."
 ```
 
 ```bash
 echo "Hello, World!"
 ```
-
----
 
 # 3. 表格
 
@@ -58,8 +58,15 @@ echo "Hello, World!"
 | 蘋果 | 10 | 紅色 |
 | 香蕉 | 25 | 黃色 |
 
----
-
 # 4. 圖片
 
-![範例圖片](./hello.png)
+圖片需與前後文字之間空一行，才會當成獨立圖片（有說明文字時才能設定對齊）。
+
+![向左對齊](./hello.png){width=4cm align=left}
+
+![置中對齊](./hello.png){width=4cm align=center}
+
+![向右對齊](./hello.png){width=4cm align=right}
+
+行內圖片，3cm
+![向右對齊](./hello.png){width=3cm}
