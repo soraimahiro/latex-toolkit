@@ -17,36 +17,45 @@ docker build -t latex-toolkit:main .
 
 *注意：因為 `texlive/texlive:latest` 包含完整的 TeX Live 發行版及 Noto CJK 字型，映像檔建置需要較多硬碟空間（約數 GB）與下載時間。*
 
-### 設定為全域指令（選用）
+### 設定為全域指令
+以下幾種方法
 
-在 `~/.zshrc`（或 `~/.bashrc`）加入 alias，即可在任何目錄使用 `latex-toolkit`：
+1. 在 `~/.local/bin` 建立 symlink
+  在 `~/.local/bin` 建立名為 `latextk` 的 symlink，即可在任何目錄使用 `latextk`。
+  ```bash
+  ln -s "path/to/latex-toolkit/latex-toolkit.py" ~/.local/bin/latextk
+  ```
+  若 `~/.local/bin` 尚未建立，請自行建立目錄，並在 `.bashrc`（或 `.zshrc`，看你用什麼 shell）加入 `export PATH="$HOME/.local/bin:$PATH"`。
 
-```bash
-alias latex-toolkit="/path/to/latex-toolkit/latex-toolkit.py"
-```
+1. 新增為 alias
+  在你用的 shell 的 rc file（例如 bash 是 .bashrc）中加入 
+  ```bash
+  alias latextk="/path/to/latex-toolkit/latex-toolkit.py"
+  ```
 
-以下範例皆以 `latex-toolkit` 表示；未設定 alias 時，請改用 `./latex-toolkit.py` 或其絕對路徑。
+建議使用 symlink 而非 alias，因為 alias 只在互動式 shell 生效，AI agent 等非互動環境讀不到，例如下方使用的 AI Agent Skill，symlink 則兩者都能用。
 
 ## 使用方法
 
 本專案提供統一的入口腳本 `latex-toolkit.py`，可藉由第一個參數（子指令）來選擇不同的編譯功能。
+這邊預設你在此專案目錄下使用，執行 `./latex-toolkit.py`。如果你已經設定全域指令 latextk，就可以直接把 `./latex-toolkit.py` 換成 latextk
 
 ### 1. 使用 XeLaTeX 編譯 LaTeX 檔案 (`xelatex`)
 
 使用 XeLaTeX 編譯 `.tex` 檔案。此指令會使用 `latexmk` 自動執行多遍編譯以處理交叉引用。
 
 ```bash
-latex-toolkit xelatex <input.tex> [-o output.pdf] [其他選項...]
+./latex-toolkit.py xelatex <input.tex> [-o output.pdf] [其他選項...]
 ```
 
 #### 範例：
 ```bash
-latex-toolkit xelatex document.tex
+./latex-toolkit.py xelatex document.tex
 ```
 *這會生成 `document.pdf`。*
 
 ```bash
-latex-toolkit xelatex document.tex -o build/report.pdf
+./latex-toolkit.py xelatex document.tex -o build/report.pdf
 ```
 *這會生成並將 PDF 存放在 `build/report.pdf`。*
 
@@ -66,12 +75,12 @@ latex-toolkit xelatex document.tex -o build/report.pdf
 使用 LuaLaTeX 編譯 `.tex` 檔案。
 
 ```bash
-latex-toolkit lualatex <input.tex> [-o output.pdf] [其他選項...]
+./latex-toolkit.py lualatex <input.tex> [-o output.pdf] [其他選項...]
 ```
 
 #### 範例：
 ```bash
-latex-toolkit lualatex document.tex -o output.pdf
+./latex-toolkit.py lualatex document.tex -o output.pdf
 ```
 
 #### 中文支援範例 (`luatexja`)：
@@ -92,7 +101,7 @@ latex-toolkit lualatex document.tex -o output.pdf
 此功能與原先舊版本完全相容，會使用 Pandoc 將 Markdown 轉換為 PDF，預設會載入中文字型設定標頭並使用 XeLaTeX 引擎。
 
 ```bash
-latex-toolkit pandoc <markdown_檔案> [額外 pandoc 選項...]
+./latex-toolkit.py pandoc <markdown_檔案> [額外 pandoc 選項...]
 ```
 
 #### 參數選項：
@@ -101,22 +110,22 @@ latex-toolkit pandoc <markdown_檔案> [額外 pandoc 選項...]
 #### 範例：
 ```bash
 # 基本轉換（自動將輸出檔名設為 .pdf）
-latex-toolkit pandoc document.md
+./latex-toolkit.py pandoc document.md
 
 # 自訂輸出檔名
-latex-toolkit pandoc document.md -o final_report.pdf
+./latex-toolkit.py pandoc document.md -o final_report.pdf
 
 # 使用內建正式技術報告範本（直接指定範本名稱即可）
-latex-toolkit pandoc document.md --template formal -o final_report.pdf
+./latex-toolkit.py pandoc document.md --template formal -o final_report.pdf
 
 # 透過參數指定字體：serif / sans / times
-latex-toolkit pandoc document.md --template formal -V font=times -o report_times.pdf
+./latex-toolkit.py pandoc document.md --template formal -V font=times -o report_times.pdf
 
 # 列出所有可用的範本名稱
-latex-toolkit pandoc --list-templates
+./latex-toolkit.py pandoc --list-templates
 
 # 停用預設標頭，使用自訂標頭
-latex-toolkit pandoc document.md --no-default-header -H custom_header.tex
+./latex-toolkit.py pandoc document.md --no-default-header -H custom_header.tex
 ```
 
 #### 使用範本
@@ -139,6 +148,23 @@ latex-toolkit pandoc document.md --no-default-header -H custom_header.tex
 - `latex-toolkit.py`: 外部統一 Python 腳本（僅用標準函式庫），掛載當前目錄與範本目錄並將引數傳遞給容器。
 - `header.tex`: Pandoc 預設的 LaTeX 標頭檔，用於一般 Markdown 中文支援。
 - `template/`: Pandoc 範本庫目錄，每個範本以獨立子目錄存放（如 `template/formal/`）。
+- `skills/latex-toolkit/`: 供 AI agent 使用的 Skill（見下方「AI Agent Skill」）。
+
+## AI Agent Skill
+
+`skills/latex-toolkit/SKILL.md` 是一份 Agent Skill，教 AI agent 如何用本工具把 `.tex`／`.md` 編譯成 PDF，內容涵蓋：工作目錄掛載限制、各子指令用法、具名範本與疑難排解。
+
+Skill 內不含任何電腦的絕對路徑。agent 會依序用以下方式找到本工具：`PATH` 上的 `latextk` 指令（見上方「設定為全域指令」）→ 環境變數 `LATEX_TOOLKIT_DIR` → 由 Skill 所在位置（解析 symlink 後往上兩層）推得 repo 根目錄。
+
+### 安裝
+
+將 `skills/latex-toolkit` 複製或建立 symlink 到你的 agent 存放 skill 的資料夾下。
+以 claude code 為例，存放 skills 的地方是 `~/.claude/skills` 就可以建立 symlink 到底下
+```bash
+ln -s "path/to/latex-toolkit/skills/latex-toolkit" ~/.claude/skills/latex-toolkit
+```
+
+加入之後可以在 agent 中用 `/latex-toolkit` 手動呼叫。
 
 ## VS Code 整合 (LaTeX Workshop)
 
