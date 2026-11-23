@@ -22,13 +22,13 @@ cp template/formal/template.example.yaml template/formal/template.yaml
 
 ```bash
 # 基本編譯
-./latex-toolkit.sh pandoc mydoc.md --template formal -o output.pdf
+latex-toolkit pandoc mydoc.md --template formal -o output.pdf
 
 # 亦可使用簡寫
-./latex-toolkit.sh pandoc mydoc.md -t formal -o output.pdf
+latex-toolkit pandoc mydoc.md -t formal -o output.pdf
 
 # 動態切換字體（serif / sans / times）
-./latex-toolkit.sh pandoc mydoc.md --template formal -V font=times -o output.pdf
+latex-toolkit pandoc mydoc.md --template formal -V font=times -o output.pdf
 ```
 
 ## 可設定的變數

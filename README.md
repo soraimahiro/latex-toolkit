@@ -5,7 +5,7 @@
 ## 系統需求
 
 - [Docker](https://www.docker.com/)
-- Bash (Linux/macOS 或 Windows WSL)
+- Python 3（Linux/macOS 或 Windows WSL）
 
 ## 安裝與建置
 
@@ -17,26 +17,36 @@ docker build -t latex-toolkit:main .
 
 *注意：因為 `texlive/texlive:latest` 包含完整的 TeX Live 發行版及 Noto CJK 字型，映像檔建置需要較多硬碟空間（約數 GB）與下載時間。*
 
+### 設定為全域指令（選用）
+
+在 `~/.zshrc`（或 `~/.bashrc`）加入 alias，即可在任何目錄使用 `latex-toolkit`：
+
+```bash
+alias latex-toolkit="/path/to/latex-toolkit/latex-toolkit.py"
+```
+
+以下範例皆以 `latex-toolkit` 表示；未設定 alias 時，請改用 `./latex-toolkit.py` 或其絕對路徑。
+
 ## 使用方法
 
-本專案提供統一的入口腳本 `./latex-toolkit.sh`，可藉由第一個參數（子指令）來選擇不同的編譯功能。
+本專案提供統一的入口腳本 `latex-toolkit.py`，可藉由第一個參數（子指令）來選擇不同的編譯功能。
 
 ### 1. 使用 XeLaTeX 編譯 LaTeX 檔案 (`xelatex`)
 
 使用 XeLaTeX 編譯 `.tex` 檔案。此指令會使用 `latexmk` 自動執行多遍編譯以處理交叉引用。
 
 ```bash
-./latex-toolkit.sh xelatex <input.tex> [-o output.pdf] [其他選項...]
+latex-toolkit xelatex <input.tex> [-o output.pdf] [其他選項...]
 ```
 
 #### 範例：
 ```bash
-./latex-toolkit.sh xelatex document.tex
+latex-toolkit xelatex document.tex
 ```
 *這會生成 `document.pdf`。*
 
 ```bash
-./latex-toolkit.sh xelatex document.tex -o build/report.pdf
+latex-toolkit xelatex document.tex -o build/report.pdf
 ```
 *這會生成並將 PDF 存放在 `build/report.pdf`。*
 
@@ -56,12 +66,12 @@ docker build -t latex-toolkit:main .
 使用 LuaLaTeX 編譯 `.tex` 檔案。
 
 ```bash
-./latex-toolkit.sh lualatex <input.tex> [-o output.pdf] [其他選項...]
+latex-toolkit lualatex <input.tex> [-o output.pdf] [其他選項...]
 ```
 
 #### 範例：
 ```bash
-./latex-toolkit.sh lualatex document.tex -o output.pdf
+latex-toolkit lualatex document.tex -o output.pdf
 ```
 
 #### 中文支援範例 (`luatexja`)：
@@ -82,7 +92,7 @@ docker build -t latex-toolkit:main .
 此功能與原先舊版本完全相容，會使用 Pandoc 將 Markdown 轉換為 PDF，預設會載入中文字型設定標頭並使用 XeLaTeX 引擎。
 
 ```bash
-./latex-toolkit.sh pandoc <markdown_檔案> [額外 pandoc 選項...]
+latex-toolkit pandoc <markdown_檔案> [額外 pandoc 選項...]
 ```
 
 #### 參數選項：
@@ -91,22 +101,22 @@ docker build -t latex-toolkit:main .
 #### 範例：
 ```bash
 # 基本轉換（自動將輸出檔名設為 .pdf）
-./latex-toolkit.sh pandoc document.md
+latex-toolkit pandoc document.md
 
 # 自訂輸出檔名
-./latex-toolkit.sh pandoc document.md -o final_report.pdf
+latex-toolkit pandoc document.md -o final_report.pdf
 
 # 使用內建正式技術報告範本（直接指定範本名稱即可）
-./latex-toolkit.sh pandoc document.md --template formal -o final_report.pdf
+latex-toolkit pandoc document.md --template formal -o final_report.pdf
 
 # 透過參數指定字體：serif / sans / times
-./latex-toolkit.sh pandoc document.md --template formal -V font=times -o report_times.pdf
+latex-toolkit pandoc document.md --template formal -V font=times -o report_times.pdf
 
 # 列出所有可用的範本名稱
-./latex-toolkit.sh pandoc --list-templates
+latex-toolkit pandoc --list-templates
 
 # 停用預設標頭，使用自訂標頭
-./latex-toolkit.sh pandoc document.md --no-default-header -H custom_header.tex
+latex-toolkit pandoc document.md --no-default-header -H custom_header.tex
 ```
 
 #### 使用範本
@@ -126,7 +136,7 @@ docker build -t latex-toolkit:main .
 
 - `Dockerfile`: 基於 `texlive/texlive:latest`，內建 Pandoc、Noto CJK 字體以及 fontconfig。
 - `entrypoint.sh`: 容器內的啟動腳本，負責分流 `xelatex`、`lualatex` 與 `pandoc`，並進行範本解析與編譯。
-- `latex-toolkit.sh`: 外部統一 Shell 腳本，掛載當前目錄與範本目錄並將引數傳遞給容器。
+- `latex-toolkit.py`: 外部統一 Python 腳本（僅用標準函式庫），掛載當前目錄與範本目錄並將引數傳遞給容器。
 - `header.tex`: Pandoc 預設的 LaTeX 標頭檔，用於一般 Markdown 中文支援。
 - `template/`: Pandoc 範本庫目錄，每個範本以獨立子目錄存放（如 `template/formal/`）。
 
@@ -134,14 +144,14 @@ docker build -t latex-toolkit:main .
 
 如果您使用 VS Code 搭配 [LaTeX Workshop](https://marketplace.visualstudio.com/items?itemName=James-Yu.latex-workshop) 擴充功能，可以透過以下設定將其與本工具整合。
 
-請在 VS Code 的 `settings.json` 中配置自訂的 Tool 與 Recipe（**請將 `command` 的值替換為您系統中 `latex-toolkit.sh` 的絕對路徑**，例如 `/home/username/latex-toolkit/latex-toolkit.sh`）：
+請在 VS Code 的 `settings.json` 中配置自訂的 Tool 與 Recipe（**請將 `command` 的值替換為您系統中 `latex-toolkit.py` 的絕對路徑**，例如 `/home/username/latex-toolkit/latex-toolkit.py`）：
 
 ```json
 {
   "latex-workshop.latex.tools": [
     {
       "name": "docker-xelatex",
-      "command": "/path/to/latex-toolkit.sh",
+      "command": "/path/to/latex-toolkit.py",
       "args": [
         "xelatex",
         "%DOCFILE_EXT%",
@@ -152,7 +162,7 @@ docker build -t latex-toolkit:main .
     },
     {
       "name": "docker-lualatex",
-      "command": "/path/to/latex-toolkit.sh",
+      "command": "/path/to/latex-toolkit.py",
       "args": [
         "lualatex",
         "%DOCFILE_EXT%",
@@ -208,5 +218,5 @@ docker build -t latex-toolkit:main .
 
 ## 注意事項
 
-- 請確保 `latex-toolkit.sh` 具有執行權限 (`chmod +x latex-toolkit.sh`)。
+- 請確保 `latex-toolkit.py` 具有執行權限 (`chmod +x latex-toolkit.py`)。
 - 您的輸入檔案必須位於執行腳本時的當下目錄（或其子目錄）中，才能正確被掛載進 Docker 容器。
