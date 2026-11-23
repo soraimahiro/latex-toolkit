@@ -48,7 +48,7 @@ variables:
   default-fontsize: 12pt
 ```
 
-可在 template.yaml 設預設值的有 `font`、`fontsize`、`papersize`、`geometry`、`documentclass`、`toc-depth`、`secnumdepth`（加上 `default-` 前綴）。其餘變數請在 md 或 `-V` 設定。
+可在 template.yaml 設預設值的有 `font`、`monofont`、`fontsize`、`papersize`、`geometry`、`documentclass`、`toc-depth`、`secnumdepth`（加上 `default-` 前綴）。其餘變數請在 md 或 `-V` 設定。
 
 ### 文件資訊
 
@@ -66,6 +66,7 @@ variables:
 | 變數 | 說明 | 預設 |
 |---|---|---|
 | `font` | 字體：`serif`（明體）、`sans`（黑體）、`times`（Times） | `serif`（Noto Serif） |
+| `monofont` | 等寬字體（程式碼與行內程式碼），如 `JetBrains Mono`、`Source Code Pro`、`Fira Mono`、`IBM Plex Mono`、`DejaVu Sans Mono`、`Cascadia Code`；找不到時退回 Latin Modern Mono | `Noto Sans Mono` |
 | `fontsize` | 內文字級，如 `10pt`、`11pt`、`12pt` | `11pt` |
 | `papersize` | 紙張，如 `a4`、`letter` | `a4` |
 | `geometry` | 頁面邊界，可為清單，如 `margin=2.5cm` | `a4paper,margin=2.0cm` |

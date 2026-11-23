@@ -31,6 +31,10 @@ function Table(tbl)
     return prefix .. '{' .. add_vlines(cols) .. '}'
   end)
 
+  -- 1b. 標題儲存格預設是底部對齊的 minipage，換行時內容往上長會貼到上框線；改成頂部對齊
+  latex = latex:gsub('\\begin{minipage}%[b%]', '\\begin{minipage}[t]')
+  latex = latex:gsub('\\end{minipage}', '\\strut\\end{minipage}')
+
   -- 2. Replace booktabs rules
   latex = latex:gsub('\\toprule%s*\\noalign{}', '\\hline')
   latex = latex:gsub('\\midrule%s*\\noalign{}', '\\hline')

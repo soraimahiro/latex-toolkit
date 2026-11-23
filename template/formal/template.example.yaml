@@ -15,6 +15,8 @@ filters:
 # variables:
 #   # 字體：serif（明體 Noto Serif）、sans（黑體 Noto Sans）、times（Times + 明體中文）
 #   default-font: serif
+#   # 等寬字體（程式碼）：JetBrains Mono、Source Code Pro、Fira Mono、IBM Plex Mono...
+#   default-monofont: Noto Sans Mono
 #   # 內文字級：10pt、11pt、12pt
 #   default-fontsize: 11pt
 #   # 紙張：a4、letter...

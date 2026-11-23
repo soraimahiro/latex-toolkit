@@ -104,8 +104,13 @@ $endfor$
 }
 
 % 等寬程式碼字型設定
-\IfFontExistsTF{Noto Sans Mono}{%
-  \setmonofont{Noto Sans Mono}[Scale=0.92]%
+% 等寬字體可用 monofont 變數指定（-V monofont="JetBrains Mono"；template.yaml 用 default-monofont），找不到時退回 Noto Sans Mono
+\def\docmonofont{$if(default-monofont)$$default-monofont$$else$Noto Sans Mono$endif$}
+$for(monofont)$
+\def\docmonofont{$monofont$}
+$endfor$
+\IfFontExistsTF{\docmonofont}{%
+  \setmonofont{\docmonofont}[Scale=0.92]%
 }{%
   \setmonofont{Latin Modern Mono}[Scale=0.92]%
 }
@@ -191,11 +196,8 @@ $endif$
 
 % 行內程式碼樣式（灰底色與細邊框，底色比程式碼區塊略深以利辨識）
 \definecolor{inlinecodebg}{HTML}{E3E8ED}
-\DeclareRobustCommand{\texttt}[1]{%
-  \tcbox[on line, colback=inlinecodebg, colframe=codeframe, boxrule=0.4pt, arc=2pt,
-    left=1.5pt, right=1.5pt, top=0.5pt, bottom=0.5pt, boxsep=0pt,
-    nobeforeafter]{\ttfamily #1}%
-}
+% 行內程式碼：純等寬字（無底色，可自動折行），字級縮小一級以與內文協調
+\DeclareRobustCommand{\texttt}[1]{{\ttfamily\small #1}}
 
 % 引用區塊樣式（左側灰色垂直飾條）
 \definecolor{quoteborder}{HTML}{D0D7DE}
@@ -229,8 +231,10 @@ $endif$
 \makesavenoteenv{longtable}
 \setlength{\LTleft}{0pt}
 \setlength{\LTright}{0pt plus 1fill}
+\AtBeginEnvironment{longtable}{\small} % 表格內文縮小一級（改成 \footnotesize 可再小一級，刪除此行則與內文同大）
 \renewcommand{\arraystretch}{1.25}
-\setlength{\tabcolsep}{8pt}
+\setlength{\tabcolsep}{4pt}
+% 表格列高與間距：\arraystretch 為列高倍率（上下對稱留白），\tabcolsep 為左右內距
 
 % 圖片處理套件與大小自適應（支援 Pandoc 3.x 之 pandocbounded）
 \usepackage{graphicx}
