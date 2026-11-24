@@ -1,0 +1,71 @@
+%!LW recipe=Docker: XeLaTeX
+\documentclass{homework}   % 要顯示圖片 caption：\documentclass[showcaption]{homework}
+
+%---------------------------------------------------------------
+% 作業資訊（只需改這裡）
+%---------------------------------------------------------------
+\course{Course Name}
+\hwnum{1}
+\studentname{你的名字}
+\studentid{00000000X}
+
+%---------------------------------------------------------------
+% 常用數學巨集（依課程增減）
+%---------------------------------------------------------------
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\xor}{\oplus}
+\newcommand{\rand}{\xleftarrow{\mathrm{R}}}   % r <-R- Z_p
+\DeclareMathOperator{\Adv}{Adv}
+
+\begin{document}
+\hwtitle
+
+%===============================================================
+\problem{題目名稱}
+%===============================================================
+題目敘述。數學式例如 $a \xor b$、$r \rand \Z_p$。
+
+\begin{enumerate}
+  \item 第一小題
+  \begin{proof}
+    證明內容。
+    \[
+      \Adv[\mathcal{A}] \le \epsilon. \qedhere
+    \]
+  \end{proof}
+
+  \item 第二小題
+  \begin{align*}
+    x^5 + x + 1 &= (x^4 + x^2 + 1)(x) + (x^3 + 1)
+  \end{align*}
+\end{enumerate}
+
+%===============================================================
+\problem{圖、表與程式碼}
+%===============================================================
+截圖放在 \texttt{figure/}，直接寫檔名即可（例如 \verb|\includegraphics{task1.png}|）。
+\begin{figure}[H]
+  \centering
+  \includegraphics[width=0.5\linewidth]{example-image}
+  \caption{圖片說明（預設隱藏）}
+\end{figure}
+
+\begin{table}[H]
+  \centering
+  \begin{tabular}{ccc}
+    \toprule
+    欄位 A & 欄位 B & 欄位 C \\
+    \midrule
+    1 & 2 & 3 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+程式碼可以直接寫在文件中，或用 \verb|\lstinputlisting[language=Python]{code/xxx.py}| 引入 \texttt{code/} 裡的檔案。
+\begin{lstlisting}[language=Python]
+def xor(a: bytes, b: bytes) -> bytes:
+    # 逐位元組 XOR
+    return bytes(x ^ y for x, y in zip(a, b))
+\end{lstlisting}
+
+\end{document}

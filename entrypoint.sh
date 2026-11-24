@@ -111,7 +111,7 @@ elif [ "$1" = "pandoc" ]; then
 
     # 檢查是否列出所有可用範本
     if [ "$1" = "--list-templates" ] || [ "$1" = "-l" ]; then
-        echo "可用的 Pandoc 範本列表："
+        echo "可用的 Pandoc 範本列表（LaTeX 範本請用 new --list）："
         for d in /template/* /data/template/*; do
             if [ -d "$d" ]; then
                 tname=$(basename "$d")
@@ -302,5 +302,6 @@ else
     echo "  xelatex   <tex_檔案> [-o 輸出.pdf]   使用 XeLaTeX 編譯 LaTeX"
     echo "  lualatex  <tex_檔案> [-o 輸出.pdf]   使用 LuaLaTeX 編譯 LaTeX"
     echo "  pandoc    <md_檔案>  [其他參數...]    使用 Pandoc 編譯 Markdown"
+    echo "  new       <範本> [目錄]              從 LaTeX 範本建立專案（於本機執行）"
     exit 1
 fi

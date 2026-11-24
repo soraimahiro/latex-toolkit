@@ -15,7 +15,7 @@
 首次使用請先複製設定範例（`template.yaml` 不納入 git）：
 
 ```bash
-cp template/formal/template.example.yaml template/formal/template.yaml
+cp template/pandoc/formal/template.example.yaml template/pandoc/formal/template.yaml
 ```
 
 之後直接指定範本名稱即可，無需輸入檔案路徑：

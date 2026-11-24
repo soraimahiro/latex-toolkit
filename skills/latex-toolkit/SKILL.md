@@ -1,6 +1,6 @@
 ---
 name: latex-toolkit
-description: Compile LaTeX (.tex) to PDF with XeLaTeX/LuaLaTeX, or convert Markdown (.md) to PDF with Pandoc, inside a Docker container that ships full TeX Live and Noto CJK fonts (Chinese/Japanese/Korean work out of the box). Use when the user asks to build, compile, or render a .tex or .md file to PDF, wants a formal-looking report from Markdown (named template "formal"), or mentions latex-toolkit.
+description: Compile LaTeX (.tex) to PDF with XeLaTeX/LuaLaTeX, or convert Markdown (.md) to PDF with Pandoc, inside a Docker container that ships full TeX Live and Noto CJK fonts (Chinese/Japanese/Korean work out of the box). Use when the user asks to build, compile, or render a .tex or .md file to PDF, wants a formal-looking report from Markdown (named template "formal"), wants to start a new LaTeX homework or assignment from a template (`new homework`), or mentions latex-toolkit.
 ---
 
 # latex-toolkit
@@ -84,15 +84,30 @@ Behavior:
 ### Named templates
 
 `--template <name>` or `-d <name>` resolves a name (when it isn't an existing file) by searching, in order:
-`./template/<name>/`, `./templates/<name>/` (in the cwd), then the toolkit's built-in `template/<name>/`.
+`./template/<name>/`, `./templates/<name>/` (in the cwd), then the toolkit's built-in `template/pandoc/<name>/` (mounted in the container as `/template/<name>/`).
 In each directory, `template.yaml` or `<name>.yaml` becomes `--defaults=...`; otherwise `template.latex` or `<name>.latex` becomes `--template=...`.
 
-Built-in template **`formal`** (formal reports, specs, papers). Full variable list: `$TOOLKIT_DIR/template/formal/README.md`. Read it before setting variables. Commonly used ones:
+Built-in template **`formal`** (formal reports, specs, papers). Full variable list: `$TOOLKIT_DIR/template/pandoc/formal/README.md`. Read it before setting variables. Commonly used ones:
 - Document info (YAML front matter or `-V`): `title`, `subtitle`, `author`, `date`, `abstract`
 - `font`: `serif` (default), `sans`, `times`; `monofont`; `fontsize` (e.g. `12pt`); `papersize`; `geometry`
 - `toc: true` for a table of contents
 - Precedence: `-V` > Markdown front matter > `template.yaml` defaults.
-- `template/formal/template.yaml` (copied from `template.example.yaml`, git-ignored) wires in the Lua filters and defaults. If it's missing, only `template.latex` is used, so grid tables and `{align=...}` images won't work. Check for that file when the output looks off.
+- `template/pandoc/formal/template.yaml` (copied from `template.example.yaml`, git-ignored) wires in the Lua filters and defaults. If it's missing, only `template.latex` is used, so grid tables and `{align=...}` images won't work. Check for that file when the output looks off.
+
+### new: start a LaTeX project from a template
+
+Runs on the host (no Docker). Copies `$TOOLKIT_DIR/template/latex/<name>/` (except its `README.md`) into a directory.
+
+```bash
+"$LT" new --list                 # list LaTeX templates
+"$LT" new homework hw3           # create hw3/ (default dir: cwd)
+"$LT" new homework hw3 --force   # overwrite existing files
+cd hw3 && "$LT" xelatex main.tex
+```
+
+- It refuses to overwrite and lists the conflicts unless `--force` is given. Don't pass `--force` without asking the user.
+- Built-in **`homework`**: `homework.cls` + `main.tex` + `figure/` + `code/`. Set info with `\course{}`, `\hwnum{}`, `\studentname{}`, `\studentid{}`, then `\hwtitle`, `\problem{title}` per question, and `enumerate` for `(1)(2)` sub-items. The `showcaption` class option shows figure captions (hidden by default). Details: `$TOOLKIT_DIR/template/latex/homework/README.md`.
+- These are LaTeX project templates, separate from the Pandoc templates used by `pandoc --template`.
 
 ## Troubleshooting
 
@@ -103,6 +118,6 @@ Built-in template **`formal`** (formal reports, specs, papers). Full variable li
 | `編譯失敗！` (xelatex/lualatex) | Read `<name>.log` in the cwd and look for lines starting with `!`. |
 | `File ... not found` / missing image | The file is outside the cwd mount, or the path isn't relative to the cwd. |
 | Missing CJK glyphs / tofu | The document doesn't load a CJK package or font (see the CJK notes above). |
-| `錯誤: 未知的指令` | The first argument must be `xelatex`, `lualatex`, or `pandoc`. |
+| `錯誤: 未知的指令` | The first argument must be `xelatex`, `lualatex`, `pandoc`, or `new`. |
 
 The exit code is the container's exit code, so non-zero means failure.

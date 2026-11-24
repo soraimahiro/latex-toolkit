@@ -130,24 +130,49 @@ docker build -t latex-toolkit:main .
 
 #### 使用範本
 
-範本存放於 `template/` 下，每個範本一個子目錄。使用時以 `--template <名稱>`（或 `-t <名稱>`）指定名稱即可，不需輸入路徑。`formal` 範本的設定變數與字體選項請參閱 [template/formal/README.md](template/formal/README.md)。
+Pandoc 範本存放於 `template/pandoc/` 下，每個範本一個子目錄。使用時以 `--template <名稱>`（或 `-t <名稱>`）指定名稱即可，不需輸入路徑。`formal` 範本的設定變數與字體選項請參閱 [template/pandoc/formal/README.md](template/pandoc/formal/README.md)。
 
 #### 新增範本
 
 例如建立 `academic`：
-1. 在 `template/` 下建立子資料夾 `template/academic/`。
+1. 在 `template/pandoc/` 下建立子資料夾 `template/pandoc/academic/`。
 2. 放入 `template.latex`（LaTeX 排版範本）與 `template.yaml`（Pandoc Defaults 設定檔，需設定 `template: /template/academic/template.latex`），另可放入 Lua Filter 等檔案。
 3. 之後即可用 `--template academic` 使用。
+
+（`template/pandoc/` 在容器內掛載為 `/template`，所以 yaml 裡的路徑寫 `/template/<名稱>/...`。）
+
+---
+
+### 4. 從 LaTeX 範本建立專案 (`new`)
+
+把 `template/latex/<名稱>/` 裡的檔案複製到指定目錄，建立一個可以直接編譯的 LaTeX 專案。這個指令在本機執行，不需要 Docker。
+
+```bash
+./latex-toolkit.py new --list              # 列出可用的 LaTeX 範本
+./latex-toolkit.py new homework            # 在當前目錄建立
+./latex-toolkit.py new homework hw3        # 在 hw3/ 建立（目錄不存在會自動建立）
+./latex-toolkit.py new homework hw3 --force  # 覆蓋已存在的檔案
+```
+
+建立後 `cd hw3 && ./latex-toolkit.py xelatex main.tex` 即可編譯。排版設定都放在專案內的 `.cls` 檔，所以專案本身是自給自足的，也能直接上傳到 Overleaf（編譯器選 XeLaTeX）。
+
+內建範本：
+- `homework`：作業範本（題號標題、`(1)(2)` 小題、程式碼排版、中文支援），說明見 [template/latex/homework/README.md](template/latex/homework/README.md)。
+
+#### 新增 LaTeX 範本
+
+在 `template/latex/` 下建立子資料夾（例如 `template/latex/report/`），放入要複製到新專案的所有檔案即可。資料夾裡的 `README.md` 不會被複製；空資料夾可放 `.gitkeep`，`new` 只會建立資料夾，不會複製 `.gitkeep`。
 
 ---
 
 ## 專案結構
 
 - `Dockerfile`: 基於 `texlive/texlive:latest`，內建 Pandoc、Noto CJK 字體以及 fontconfig。
-- `entrypoint.sh`: 容器內的啟動腳本，負責分流 `xelatex`、`lualatex` 與 `pandoc`，並進行範本解析與編譯。
+- `entrypoint.sh`: 容器內的啟動腳本，負責分流 `xelatex`、`lualatex` 與 `pandoc`（`new` 由 `latex-toolkit.py` 在本機處理），並進行範本解析與編譯。
 - `latex-toolkit.py`: 外部統一 Python 腳本（僅用標準函式庫），掛載當前目錄與範本目錄並將引數傳遞給容器。
 - `header.tex`: Pandoc 預設的 LaTeX 標頭檔，用於一般 Markdown 中文支援。
-- `template/`: Pandoc 範本庫目錄，每個範本以獨立子目錄存放（如 `template/formal/`）。
+- `template/pandoc/`: Pandoc 範本庫目錄，每個範本以獨立子目錄存放（如 `template/pandoc/formal/`）。
+- `template/latex/`: LaTeX 專案範本，供 `new` 子指令複製（如 `template/latex/homework/`）。
 - `skills/latex-toolkit/`: 供 AI agent 使用的 Skill（見下方「AI Agent Skill」）。
 
 ## AI Agent Skill
