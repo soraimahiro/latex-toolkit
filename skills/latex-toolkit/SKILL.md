@@ -106,7 +106,7 @@ cd hw3 && "$LT" xelatex main.tex
 ```
 
 - It refuses to overwrite and lists the conflicts unless `--force` is given. Don't pass `--force` without asking the user.
-- Built-in **`homework`**: `homework.cls` + `main.tex` + `figure/` + `code/`. Set info with `\course{}`, `\hwnum{}`, `\studentname{}`, `\studentid{}`, then `\hwtitle`, `\problem{title}` per question, and `enumerate` for `(1)(2)` sub-items. The `showcaption` class option shows figure captions (hidden by default). Details: `$TOOLKIT_DIR/template/latex/homework/README.md`.
+- Built-in **`homework`**: `homework.cls` + `main.tex` + `figure/` + `code/`. Set `\title{}` and `\subtitle{}` (e.g. name and student ID), then `\maketitle`, `\problem{title}` per question, and `enumerate` for `(1)(2)` sub-items. The `showcaption` class option shows figure captions (hidden by default). Details: `$TOOLKIT_DIR/template/latex/homework/README.md`.
 - These are LaTeX project templates, separate from the Pandoc templates used by `pandoc --template`.
 
 ## Troubleshooting

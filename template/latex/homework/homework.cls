@@ -45,16 +45,10 @@
 \graphicspath{{figure/}}               % 截圖放在 figure/ 資料夾
 
 %---------------------------------------------------------------
-% 作業資訊：在 main.tex 用 \course{...} 等指令設定
+% 作業資訊：在 main.tex 用 \title{...}、\subtitle{...} 設定
 %---------------------------------------------------------------
-\newcommand{\hw@course}{Course}
-\newcommand{\hw@hwnum}{1}
-\newcommand{\hw@studentname}{Name}
-\newcommand{\hw@studentid}{ID}
-\newcommand{\course}[1]{\renewcommand{\hw@course}{#1}}
-\newcommand{\hwnum}[1]{\renewcommand{\hw@hwnum}{#1}}
-\newcommand{\studentname}[1]{\renewcommand{\hw@studentname}{#1}}
-\newcommand{\studentid}[1]{\renewcommand{\hw@studentid}{#1}}
+\newcommand{\hw@subtitle}{}
+\newcommand{\subtitle}[1]{\renewcommand{\hw@subtitle}{#1}}
 
 %---------------------------------------------------------------
 % 頁首頁尾
@@ -78,8 +72,8 @@
 % \problem{題目名稱}
 \newcommand{\problem}[1]{%
   \refstepcounter{prob}%
-  \section*{\large\bfseries \hw@hwnum.\theprob\quad #1\\[-0.6em]\rule{\linewidth}{0.4pt}}%
-  \addcontentsline{toc}{section}{\hw@hwnum.\theprob\ #1}%
+  \section*{\large\bfseries \theprob\quad #1\\[-0.6em]\rule{\linewidth}{0.4pt}}%
+  \addcontentsline{toc}{section}{\theprob\ #1}%
 }
 % 小題用 enumerate，標籤為 (1)(2)…
 \setlist[enumerate,1]{label=(\arabic*), leftmargin=2em}
@@ -101,7 +95,9 @@
   keywordstyle=\color{kw}\bfseries,
   commentstyle=\color{cmt}\itshape,
   backgroundcolor=\color{bg},
-  numbers=left, numberstyle=\tiny\color{gray},
+  % 不加行號，複製程式碼時才不會連數字一起選到
+  % 個別區塊需要時可用 \begin{lstlisting}[numbers=left]
+  numbers=none, numberstyle=\tiny\color{gray},
   breaklines=true, frame=single, framerule=0.2pt,
   showstringspaces=false, tabsize=4,
   columns=fullflexible, keepspaces=true,
@@ -109,12 +105,12 @@
 }
 
 %---------------------------------------------------------------
-% 標題（精簡版）：在 \begin{document} 後呼叫 \hwtitle
+% 標題（精簡版）：在 \begin{document} 後呼叫 \maketitle
 %---------------------------------------------------------------
-\newcommand{\hwtitle}{%
+\renewcommand{\maketitle}{%
   \begin{center}
-    {\LARGE\bfseries \hw@course\ -- Assignment \hw@hwnum}\\[2pt]
-    {\normalsize \hw@studentname\quad \hw@studentid}
+    {\LARGE\bfseries \@title}%
+    \ifx\hw@subtitle\@empty\else\\[2pt]{\normalsize \hw@subtitle}\fi
   \end{center}
   \vspace{-0.5em}
   \thispagestyle{fancy}

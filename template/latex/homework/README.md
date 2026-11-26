@@ -21,12 +21,10 @@ latextk xelatex main.tex
 
 | 指令 | 說明 |
 | --- | --- |
-| `\course{...}` | 課程名稱 |
-| `\hwnum{...}` | 作業編號，也會用在題號（例如 `2.1`） |
-| `\studentname{...}` | 姓名 |
-| `\studentid{...}` | 學號 |
-| `\hwtitle` | 在 `\begin{document}` 後輸出標題 |
-| `\problem{題目名稱}` | 新的一題，自動編號並畫分隔線 |
+| `\title{...}` | 標題，例如 `Information Security -- Assignment 2` |
+| `\subtitle{...}` | 標題下方的小字，例如 `姓名\quad 學號`（可省略） |
+| `\maketitle` | 在 `\begin{document}` 後輸出標題（精簡版，不顯示日期） |
+| `\problem{題目名稱}` | 新的一題，自動編號（1、2、…）並畫分隔線 |
 
 小題用 `enumerate`，標籤為 `(1)(2)…`。
 
@@ -38,5 +36,5 @@ latextk xelatex main.tex
 ## 內建環境
 
 - `proof`（標題為 `proof:`，結尾 ■）、`lemma`、`claim`
-- `listings` 程式碼樣式（灰底、行號、自動換行）
+- `listings` 程式碼樣式（灰底、自動換行；預設無行號，方便複製，個別區塊可加 `[numbers=left]`）
 - `float` 的 `[H]`、`booktabs` 表格
